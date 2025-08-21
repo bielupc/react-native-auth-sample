@@ -35,7 +35,7 @@ export default function LoginScreen() {
           color: '#ffffff',
           marginBottom: 10
         }}>
-          Openfort
+          AI Trading Bot
         </Text>
         <Text style={{
           fontSize: 16,

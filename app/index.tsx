@@ -13,12 +13,20 @@ export default function Index() {
 
   useEffect(() => {
     checkOnboardingStatus();
-  }, []);
+  }, [user]); // Add user as dependency to re-run when user changes
 
   const checkOnboardingStatus = async () => {
     try {
-      const completed = await AsyncStorage.getItem('onboardingCompleted');
-      setOnboardingCompleted(completed === 'true');
+      if (user) {
+        // When user logs in, always reset onboarding to false and clear stored data
+        await AsyncStorage.removeItem('onboardingCompleted');
+        await AsyncStorage.removeItem('onboardingAnswers');
+        setOnboardingCompleted(false);
+      } else {
+        // When no user, check if there's stored onboarding status
+        const completed = await AsyncStorage.getItem('onboardingCompleted');
+        setOnboardingCompleted(completed === 'true');
+      }
     } catch (error) {
       console.error('Error checking onboarding status:', error);
       setOnboardingCompleted(false);
