@@ -1,20 +1,36 @@
-import { OAuthProvider, useOAuth, useOpenfort, UserWallet, useUser, useWallets } from "@openfort/react-native";
-import React, { useCallback, useState } from "react";
-import { Button, ScrollView, Text, View } from "react-native";
-
+import { useOAuth, useOpenfort, UserWallet, useUser, useWallets } from "@openfort/react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useCallback, useEffect, useState } from "react";
+import { Button, ScrollView, StyleSheet, Text, View } from "react-native";
 
 export const UserScreen = () => {
   const [chainId, setChainId] = useState("84532");
   const [isSwitchingChain, setIsSwitchingChain] = useState(false);
+  const [onboardingAnswers, setOnboardingAnswers] = useState<Record<number, string | string[]> | null>(null);
 
   // const { signOut } = useSignOut();
   const { user } = useUser();
   const { isReady, error, logout: signOut } = useOpenfort();
   console.log('isReady', isReady)
   console.log('error', error)
-  const { link, isLoading: isOAuthLoading } = useOAuth();
+  const { linkOauth, isLoading: isOAuthLoading } = useOAuth();
 
   const { wallets, setActiveWallet, createWallet, activeWallet, isCreating } = useWallets();
+
+  useEffect(() => {
+    loadOnboardingAnswers();
+  }, []);
+
+  const loadOnboardingAnswers = async () => {
+    try {
+      const answers = await AsyncStorage.getItem('onboardingAnswers');
+      if (answers) {
+        setOnboardingAnswers(JSON.parse(answers));
+      }
+    } catch (error) {
+      console.error('Error loading onboarding answers:', error);
+    }
+  };
 
   // console.log("Embedded Wallets:", wallets, "Status:", status);
 
@@ -68,73 +84,48 @@ export const UserScreen = () => {
   }
 
   return (
-    <ScrollView >
-      <View style={{ display: "flex", flexDirection: "column", margin: 10 }}>
-        {(["twitter", "google", "discord", "apple"] as const).map((provider) => (
-          <View key={provider}>
-            <Button
-              title={`Link ${provider}`}
-              disabled={isOAuthLoading}
-              onPress={async () => {
-                try {
-                  await link({ provider: provider as OAuthProvider })
-                } catch (e) {
-                  console.error("Error linking account:", e);
-                }
-              }}
-            ></Button>
-          </View>
-        ))}
-      </View>
-
-      <View style={{ borderColor: "rgba(0,0,0,0.1)", borderWidth: 1 }}>
-        <View
-          style={{
-            padding: 20,
-            display: "flex",
-            flexDirection: "column",
-            gap: 10,
-          }}
-        >
-          <View>
-            <Text style={{ fontWeight: "bold" }}>User ID</Text>
-            <Text>{user.id}</Text>
-          </View>
-
-          {/* <View>
-            <Text style={{ fontWeight: "bold" }}>Linked accounts</Text>
-            {user?.linkedAccounts.length ? (
-              <View style={{ display: "flex", flexDirection: "column" }}>
-                {user?.linkedAccounts?.map((m) => (
-                  <Text
-                    key={m.verified_at}
-                    style={{
-                      color: "rgba(0,0,0,0.5)",
-                      fontSize: 12,
-                      fontStyle: "italic",
-                    }}
-                  >
-                    {m.type}: {toMainIdentifier(m)}
+    <ScrollView style={styles.container}>
+      {/* Onboarding Answers Section */}
+      {onboardingAnswers && (
+        <View style={styles.onboardingSection}>
+          <Text style={styles.sectionTitle}>Your Trading Profile</Text>
+          <View style={styles.answersContainer}>
+            {Object.entries(onboardingAnswers).map(([questionId, answer]) => {
+              const questionNumber = parseInt(questionId);
+              const question = getQuestionText(questionNumber);
+              return (
+                <View key={questionId} style={styles.answerItem}>
+                  <Text style={styles.questionText}>{question}</Text>
+                  <Text style={styles.answerText}>
+                    {Array.isArray(answer) ? answer.join(', ') : answer}
                   </Text>
-                ))}
-              </View>
-            ) : null}
-          </View> */}
+                </View>
+              );
+            })}
+          </View>
+        </View>
+      )}
+
+      <View style={styles.walletSection}>
+        <View style={styles.walletContent}>
+          <View>
+            <Text style={styles.label}>User ID</Text>
+            <Text style={styles.value}>{user.id}</Text>
+          </View>
 
           <View>
-            {/* <Text style={{ fontWeight: "bold" }}>{`Embedded Wallet: ${activeWallet?.address || "disconnected"}`}</Text> */}
             {activeWallet?.address && (
               <>
-                <Text style={{ fontWeight: "bold" }}>Current Wallet</Text>
-                <Text>{activeWallet?.address || "disconnected"}</Text>
+                <Text style={styles.label}>Current Wallet</Text>
+                <Text style={styles.value}>{activeWallet?.address || "disconnected"}</Text>
               </>
             )}
 
-            <Text style={{ fontWeight: "bold", marginTop: 20, fontSize: 16 }}>Available Wallets</Text>
+            <Text style={styles.sectionSubtitle}>Available Wallets</Text>
             {
               wallets
                 .map((w, i) => (
-                  <View key={w.address + i} style={{ display: "flex", flexDirection: "row", gap: 5, alignItems: "center" }}>
+                  <View key={w.address + i} style={styles.walletItem}>
                     <Button
                       title={`${w.address.slice(0, 6)}...${w.address.slice(-4)}`}
                       disabled={activeWallet?.address === w.address}
@@ -152,7 +143,7 @@ export const UserScreen = () => {
 
                     {
                       w.isConnecting && (
-                        <Text style={{ color: "rgba(0,0,0,0.5)", fontSize: 12, fontStyle: "italic" }}>
+                        <Text style={styles.connectingText}>
                           Connecting...
                         </Text>
                       )
@@ -173,7 +164,7 @@ export const UserScreen = () => {
               })} />
 
             <>
-              <Text>Chain ID: {isSwitchingChain ? "Switching..." : chainId}</Text>
+              <Text style={styles.value}>Chain ID: {isSwitchingChain ? "Switching..." : chainId}</Text>
               <Button
                 title={`Switch to ${chainId === "11155111" ? "84532" : "11155111"}`}
                 onPress={async () => {
@@ -185,15 +176,126 @@ export const UserScreen = () => {
             </>
           </View>
 
-          <View style={{ display: "flex", flexDirection: "column" }}>
-            <Button
-              title="Sign Message"
-              onPress={async () => signMessage()}
-            />
-          </View>
           <Button title="Logout" onPress={signOut} />
+          <Button 
+            title="Reset Onboarding" 
+            onPress={async () => {
+              try {
+                await AsyncStorage.removeItem('onboardingAnswers');
+                await AsyncStorage.removeItem('onboardingCompleted');
+                setOnboardingAnswers(null);
+                alert('Onboarding reset successfully! Please restart the app to see the onboarding again.');
+              } catch (error) {
+                console.error('Error resetting onboarding:', error);
+                alert('Failed to reset onboarding');
+              }
+            }}
+            color="#ff8800"
+          />
         </View>
-      </View >
-    </ScrollView >
+      </View>
+    </ScrollView>
   );
 };
+
+// Helper function to get question text based on question ID
+const getQuestionText = (questionId: number): string => {
+  const questions = {
+    1: "Trading Experience Level",
+    2: "Primary Investment Goal",
+    3: "Daily Trading Time",
+    4: "Risk Tolerance",
+    5: "Preferred Trading Strategies",
+    6: "Preferred Trading Market"
+  };
+  return questions[questionId as keyof typeof questions] || `Question ${questionId}`;
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#0f0f23',
+  },
+  onboardingSection: {
+    backgroundColor: '#1a1a2e',
+    margin: 10,
+    borderRadius: 12,
+    padding: 20,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#ffffff',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  answersContainer: {
+    gap: 15,
+  },
+  answerItem: {
+    backgroundColor: '#2a2a3e',
+    padding: 15,
+    borderRadius: 8,
+  },
+  questionText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#00ff9d',
+    marginBottom: 5,
+  },
+  answerText: {
+    fontSize: 14,
+    color: '#ffffff',
+  },
+  content: {
+    display: "flex",
+    flexDirection: "column",
+    margin: 10,
+  },
+  walletSection: {
+    borderColor: "rgba(0,0,0,0.1)",
+    borderWidth: 1,
+    margin: 10,
+    borderRadius: 12,
+    backgroundColor: '#1a1a2e',
+  },
+  walletContent: {
+    padding: 20,
+    display: "flex",
+    flexDirection: "column",
+    gap: 10,
+  },
+  label: {
+    fontWeight: "bold",
+    color: '#ffffff',
+    fontSize: 16,
+  },
+  value: {
+    color: '#ffffff',
+    fontSize: 14,
+    marginBottom: 10,
+  },
+  sectionSubtitle: {
+    fontWeight: "bold",
+    marginTop: 20,
+    fontSize: 16,
+    color: '#ffffff',
+  },
+  walletItem: {
+    display: "flex",
+    flexDirection: "row",
+    gap: 5,
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  connectingText: {
+    color: "rgba(255,255,255,0.5)",
+    fontSize: 12,
+    fontStyle: "italic",
+  },
+  buttonContainer: {
+    display: "flex",
+    flexDirection: "column",
+    marginTop: 10,
+  },
+});

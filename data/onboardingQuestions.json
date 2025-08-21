@@ -1,0 +1,78 @@
+{
+  "questions": [
+    {
+      "id": 1,
+      "question": "What's your trading experience level?",
+      "type": "single_choice",
+      "options": [
+        "Beginner - I'm new to trading",
+        "Intermediate - I have some experience",
+        "Advanced - I'm an experienced trader"
+      ],
+      "required": true
+    },
+    {
+      "id": 2,
+      "question": "What's your primary investment goal?",
+      "type": "single_choice",
+      "options": [
+        "Long-term wealth building",
+        "Short-term gains",
+        "Portfolio diversification",
+        "Learning and experimentation"
+      ],
+      "required": true
+    },
+    {
+      "id": 3,
+      "question": "How much time can you dedicate to trading daily?",
+      "type": "single_choice",
+      "options": [
+        "Less than 1 hour",
+        "1-2 hours",
+        "2-4 hours",
+        "More than 4 hours"
+      ],
+      "required": true
+    },
+    {
+      "id": 4,
+      "question": "What's your risk tolerance?",
+      "type": "single_choice",
+      "options": [
+        "Conservative - I prefer stable, low-risk investments",
+        "Moderate - I'm okay with some risk for better returns",
+        "Aggressive - I'm comfortable with high-risk, high-reward strategies"
+      ],
+      "required": true
+    },
+    {
+      "id": 5,
+      "question": "Which trading strategies interest you most?",
+      "type": "multiple_choice",
+      "options": [
+        "Day trading",
+        "Swing trading",
+        "Position trading",
+        "Scalping",
+        "Trend following",
+        "Mean reversion"
+      ],
+      "required": true,
+      "maxSelections": 3
+    },
+    {
+      "id": 6,
+      "question": "What's your preferred trading market?",
+      "type": "single_choice",
+      "options": [
+        "Stocks",
+        "Cryptocurrency",
+        "Forex",
+        "Commodities",
+        "Options/Futures"
+      ],
+      "required": true
+    }
+  ]
+} 

@@ -1,9 +1,10 @@
-import { OAuthProvider, useGuestAuth, useOAuth } from "@openfort/react-native";
-import { Button, Text, View } from "react-native";
+import { OAuthProvider, useGuestAuth, useOAuth, useOpenfort } from "@openfort/react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 
 export default function LoginScreen() {
   const { signUpGuest } = useGuestAuth()
   const { initOAuth, error } = useOAuth();
+  const { logout } = useOpenfort();
 
   return (
     <View
@@ -11,45 +12,119 @@ export default function LoginScreen() {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        gap: 10,
-        marginHorizontal: 10,
+        gap: 20,
+        backgroundColor: '#0f0f23',
+        padding: 20
       }}
     >
-      <Text style={{ fontSize: 20, fontWeight: "bold" }}>Openfort Expo Example</Text>
-      {/* <Text style={{ fontSize: 10 }}>{Application.applicationId}</Text>
-      <Text style={{ fontSize: 10 }}>
-        {Application.applicationId === "host.exp.Exponent"
-          ? "exp"
-          : Constants.expoConfig?.scheme}
-      </Text> */}
+      <View style={{
+        alignItems: 'center',
+        marginBottom: 40
+      }}>
+        {/* Replace with actual logo image */}
+        <View style={{
+          width: 100,
+          height: 100,
+          backgroundColor: '#00ff9d',
+          borderRadius: 50,
+          marginBottom: 20
+        }} />
+        <Text style={{ 
+          fontSize: 32,
+          fontWeight: "bold",
+          color: '#ffffff',
+          marginBottom: 10
+        }}>
+          Openfort
+        </Text>
+        <Text style={{
+          fontSize: 16,
+          color: '#808080'
+        }}>
+          Secure Trading Platform
+        </Text>
+      </View>
 
-      <Button
-        title="Login as Guest"
-        onPress={() =>
-          signUpGuest()
-        }
-      />
+      <TouchableOpacity
+        style={{
+          backgroundColor: '#00ff9d',
+          paddingVertical: 12,
+          paddingHorizontal: 30,
+          borderRadius: 25,
+          width: '100%'
+        }}
+        onPress={() => signUpGuest()}
+      >
+        <Text style={{
+          color: '#0f0f23',
+          fontSize: 16,
+          fontWeight: 'bold',
+          textAlign: 'center'
+        }}>
+          Login as Guest
+        </Text>
+      </TouchableOpacity>
 
       <View
-        style={{ display: "flex", flexDirection: "column", gap: 5, margin: 10 }}
+        style={{
+          width: '100%',
+          gap: 12,
+          marginTop: 20
+        }}
       >
         {["twitter", "google", "discord", "apple"].map((provider) => (
-          <View key={provider}>
-            <Button
-              title={`Login with ${provider}`}
-              onPress={async () => {
-                try {
-                  await initOAuth({ provider: provider as OAuthProvider })
-                } catch (error) {
-                  console.error("Error logging in with OAuth:", error);
-                }
+          <TouchableOpacity
+            key={provider}
+            style={{
+              backgroundColor: '#1a1a2e',
+              paddingVertical: 12,
+              paddingHorizontal: 30,
+              borderRadius: 25,
+              borderWidth: 1,
+              borderColor: '#00ff9d'
+            }}
+            onPress={async () => {
+              try {
+                await initOAuth({ provider: provider as OAuthProvider })
+              } catch (error) {
+                console.error("Error logging in with OAuth:", error);
               }
-              }
-            ></Button>
-          </View>
+            }}
+          >
+            <Text style={{
+              color: '#00ff9d',
+              fontSize: 16,
+              fontWeight: '500',
+              textAlign: 'center'
+            }}>
+              Login with {provider.charAt(0).toUpperCase() + provider.slice(1)}
+            </Text>
+          </TouchableOpacity>
         ))}
       </View>
-      {error && <Text style={{ color: "red" }}>Error: {error.message}</Text>}
+
+      <TouchableOpacity
+        style={{
+          backgroundColor: '#ff4444',
+          paddingVertical: 12,
+          paddingHorizontal: 30,
+          borderRadius: 25,
+          width: '100%',
+          marginTop: 20
+        }}
+        onPress={() => logout()}
+      >
+        <Text style={{
+          color: '#ffffff',
+          fontSize: 16,
+          fontWeight: 'bold',
+          textAlign: 'center'
+        }}>
+          Logout
+        </Text>
+      </TouchableOpacity>
+      
+      {error && <Text style={{ color: "#ff4444" }}>Error: {error.message}</Text>}
     </View>
   );
 }
