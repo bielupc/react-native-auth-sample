@@ -2,6 +2,7 @@ import { useOAuth, useOpenfort, useUser, useWallets } from "@openfort/react-nati
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import Chart from "./Chart";
 
 export const UserScreen = () => {
   const [chainId, setChainId] = useState("84532");
@@ -191,11 +192,14 @@ export const UserScreen = () => {
       {/* Chart Section */}
       <View style={styles.chartSection}>
         <Text style={styles.chartTitle}>Investments</Text>
+
         {/* <View style={styles.chartSection}> */}
         {/* </View> */}
         
         {/* Trading Simulation Interface */}
         {isTrading && (
+          <>
+          <Chart/>
           <View style={styles.tradingInterface}>
             <View style={styles.tradingOperationsContainer}>
               <Text style={styles.operationsTitle}>Live Trading Operations</Text>
@@ -282,6 +286,7 @@ export const UserScreen = () => {
               </View>
             </View>
           </View>
+          </>
         )}
 
         {/* {isTrading && (

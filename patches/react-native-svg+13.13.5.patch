@@ -1,0 +1,30 @@
+diff --git a/elements/Svg.js b/elements/Svg.js
+index 1234567..abcdefg 100644
+--- a/elements/Svg.js
++++ b/elements/Svg.js
+@@ -3,7 +3,6 @@ import React from "react";
+ import PropTypes from "prop-types";
+ import {
+-    ViewPropTypes,
+     requireNativeComponent,
+     StyleSheet,
+     findNodeHandle,
+@@ -32,7 +31,7 @@ class Svg extends Shape {
+ class Svg extends Shape {
+     static displayName = "Svg";
+     static propTypes = {
+-        ...ViewPropTypes,
+         color: PropTypes.string,
+         opacity: numberProp,
+         width: numberProp,
+@@ -40,7 +39,7 @@ class Svg extends Shape {
+         // more detail https://svgwg.org/svg2-draft/coords.html#ViewBoxAttribute
+         viewBox: PropTypes.string,
+         preserveAspectRatio: PropTypes.string,
+-        style: PropTypes.shape({
++        style: PropTypes.oneOfType([
+             ...ViewPropTypes.style,
+             color: PropTypes.string,
+-        }),
++        ]),
+     }; 
